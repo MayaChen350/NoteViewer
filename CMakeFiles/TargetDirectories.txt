@@ -1,0 +1,3 @@
+/home/mayachen/Dev/NoteViewer/CMakeFiles/NoteViewer.dir
+/home/mayachen/Dev/NoteViewer/CMakeFiles/edit_cache.dir
+/home/mayachen/Dev/NoteViewer/CMakeFiles/rebuild_cache.dir
