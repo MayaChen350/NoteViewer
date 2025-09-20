@@ -48,7 +48,7 @@ jobs:
             cmake -S . -B out \
             -DCMAKE_SYSTEM_NAME=Linux \
             -DCMAKE_SYSTEM=aarch64 \
-            -DCMAKE_C_COMPILER=aarch64-linux-gcc
+            -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc
         
         - name: Run CMake's build system gen for cross-compilation
           if: ${{matrix.arch == 'aarch64' && matrix.os == 'windows-latest'}}
@@ -81,9 +81,12 @@ jobs:
           usesh: true
           prepare: |
             pkg update
-            pkg install -y gcc realpath gmake cmake
-            echo $((realpath .))
-        
+            pkg install -y gcc gmake cmake
+       
+      - name: Test to know what's going on
+        if: true
+        run: ls -lah
+
       - name: Run CMake's build system generator
         if: matrix.arch == 'x64' 
         run: cmake -S . -B out
