@@ -81,20 +81,26 @@ jobs:
           usesh: true
           prepare: |
             pkg update
-            pkg install -y gcc gmake cmake
+            pkg install -y gcc gmake cmake git wget   
        
-      - name: Test to know what's going on
-        if: true
-        run: ls -lah
+      - name: Secret setup # Please don't laugh
+        run: |
+          git clone https://github.com/MayaChen350/NoteViewer.git
+          wget https://cmake.org/files/v4.0/cmake-4.0.0-linux-x86_64.tar.gz
+          tar -xzf cmake-4.0.0-linux-x86_64.tar.gz
+          mv cmake-4.0.0-linux-x86_64 NoteViewer/cmake 
 
       - name: Run CMake's build system generator
         if: matrix.arch == 'x64' 
-        run: cmake -S . -B out
+        run: |
+          cd NoteViewer
+          ./cmake -S . -B out 
       
       - name: Run CMake's build system gen for cross-compilation
         if: matrix.arch == 'aarch64' 
         run: |
-          cmake -S . -B out \
+          cd NoteViewer
+          ./cmake -S . -B out \
           -DCMAKE_SYSTEM_NAME=FreeBSD \
           -DCMAKE_SYSTEM=aarch64 \
           -DCMAKE_C_COMPILER=clang \
