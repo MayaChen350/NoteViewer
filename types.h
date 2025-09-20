@@ -7,6 +7,8 @@
 
 typedef char* str;
 
+typedef char byte_t;
+
 #define TRUE 1
 #define FALSE 0
 
