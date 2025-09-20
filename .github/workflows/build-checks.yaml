@@ -8,6 +8,7 @@ jobs:
         fail-fast: false
         matrix:
           os: [ubuntu-latest, windows-latest, macos-latest]
+          arch: [x64, aarch64]
       runs-on: ${{ matrix.os }}
 
       steps:
@@ -29,14 +30,50 @@ jobs:
           with:
             version: 4.0.0
          
-        - name: Run CMake's build system generator on ${{ matrix.os }}
+        - name: Run CMake's build system generator 
+          if: matrix.arch == 'x64'
           run: cmake -S . -B out
 
-        - name: Try compiling on ${{ matrix.os }}
+        - name: Install cross-compiler
+          if: ${{matrix.arch == 'aarch64' && matrix.os == 'ubuntu-latest'}}
+          run: sudo apt update && sudo apt install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu 
+        
+        - name: Install windows "cross-compiler"
+          if: ${{matrix.arch == 'aarch64' && matrix.os == 'windows-latest'}}
+          run: choco install zig
+
+        - name: Run CMake's build system gen for cross-compilation
+          if: ${{matrix.arch == 'aarch64' && matrix.os == 'ubuntu-latest'}}
+          run: |
+            cmake -S . -B out \
+            -DCMAKE_SYSTEM_NAME=Linux \
+            -DCMAKE_SYSTEM=aarch64 \
+            -DCMAKE_C_COMPILER=aarch64-linux-gcc \
+        
+        - name: Run CMake's build system gen for cross-compilation
+          if: ${{matrix.arch == 'aarch64' && matrix.os == 'windows-latest'}}
+          run: |
+            cmake -S . -B out \
+            -CMAKE_SYSTEM_NAME=Windows \
+            -CMAKE_SYSTEM_PROCESSOR=aarch64 \
+            -CMAKE_C_COMPILER=zig cc -target aarch64-windows-gnu \
+            -CMAKE_CXX_COMPILER=zig c++ -target aarch64-windows-gnu \
+        
+        - name: Run CMake's build system gen for cross-compilation
+          if: ${{matrix.arch == 'x64' && matrix.os == 'macos-latest'}}
+          run: |
+            cmake -S . -B out \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64
+
+        - name: Try compiling
           run: cmake --build out
 
   build-freebsd:
     # if: false
+    strategy:
+        fail-fast: false
+        matrix:
+          arch: [x64, aarch64]
     runs-on: ubuntu-latest
     steps:
       - uses: vmactions/freebsd-vm@v1
@@ -44,12 +81,22 @@ jobs:
           prepare: |
             pkg update
             pkg install -y gcc cmake
+            cd ..
         
       - name: Run CMake's build system generator
+        if: matrix.arch == 'x64' 
+        run: cmake -S . -B out
+      
+      - name: Run CMake's build system gen for cross-compilation
+        if: matrix.arch == 'aarch64' 
         run: |
-          cd $GITHUB_WORKSPACE
-          ls -lah
-          cmake -S . -B out
+          cmake -S . -B out \
+          -DCMAKE_SYSTEM_NAME=FreeBSD \
+          -DCMAKE_SYSTEM=aarch64 \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DCMAKE_C_FLAGS="--target=aarch64-unknown-freebsd13.2" \
+          -DCMAKE_CXX_FLAGS="--target=aarch64-unknown-freebsd13.2"
 
       - name: Try compiling
         run: cmake --build out 
