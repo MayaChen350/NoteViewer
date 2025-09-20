@@ -12,7 +12,8 @@ int main(int argc, char **argv) {
 
     FILE *file = fopen("test.txt", "r");
 
-    const str word_to_base_output_on = argv[1];
+    const str word_to_base_output_on = alloca(sizeof(wchar_t)*strlen(argv[1]));
+    mbtowc(word_to_base_output_on, argv[1], strlen(argv[1]));
     // TODO: Replace by wchar_t later on
     int curr_char = fgetc(file);
 
@@ -43,7 +44,7 @@ int main(int argc, char **argv) {
 
     // Chunk of bytes to consume from the file everytime
     wchar_t current_chunk[CHUNK_SIZE / sizeof(wchar_t)];
-    sequence_t* stack_of_chunks;
+    sequence_t *stack_of_chunks;
 
     // TODO: Send to threads and queues
     while (fgetws(current_chunk, CHUNK_SIZE / sizeof(wchar_t), file) != NULL) {
@@ -59,32 +60,29 @@ int main(int argc, char **argv) {
                 case UNDEFINED:
                     if (curr_char == '[') {
                         if (reading_state == SAVE) {
-                            const str new_string = assemble_str(&stack_of_chunks, current_chunk);
+                            wchar_t chars_saved_so_far[CHUNK_SIZE / sizeof(wchar_t)];
+                            wcslcpy(chars_saved_so_far, current_chunk, i);
+                            const str new_string = assemble_str(stack_of_chunks, chars_saved_so_far);
                             attach(current_seq_elem, new_string);
                         }
 
                         reading_state = READING_TITLE;
-                        stack_of_chunks = NULL;
+                        stack_of_chunks = malloc(sizeof(sequence_t));
                         string_size = 0;
-                    } else if (reading_state == SAVE) string_size++;
+                    } else if (reading_state == SAVE) string_size++; // this basically becomes the evil twin chunk index
                     break;
                 case READING_TITLE:
                     if (curr_char == ']') {
-                        if (wcslen(word_to_base_output_on) != string_size
-                            || wcpcpy(word_to_base_output_on, reading_chars) != 0) {
-                            reading_state = SKIP;
-                        }
-
                         // Error handling
                         if (string_size == 0) {
                             fprintf(stderr, "Empty tag at %i", line_counter);
                             exit(EXIT_FAILURE);
                         }
 
-                        if ()
+                        if (wcslen(word_to_base_output_on) != string_size
+                            || wcpcpy(word_to_base_output_on, reading_chars) != 0) {
                             reading_state = SKIP;
-                        else {
-                            string_to_save = file->_IO_write_ptr + 1;
+                        } else {
                             reading_state = SAVE;
                         }
                     } else {
@@ -104,12 +102,21 @@ int main(int argc, char **argv) {
                     break;
             }
         }
+
+        if (reading_state == SAVE) {
+            attach(stack_of_chunks, current_chunk); // if it's null deal with it
+            string_size = 0;
+        }
     }
 
 
     // TODO: Formatting
     while (start_of_sequence.next != NULL) {
-        printf("%s", start_of_sequence.next->elem);
+        printf("%ls", (*start_of_sequence.next).elem);
+
+        // no time to free anything
+
+        start_of_sequence = *start_of_sequence.next;
     }
 
     return 0;
