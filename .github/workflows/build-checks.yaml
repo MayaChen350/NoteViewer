@@ -1,0 +1,51 @@
+name: Cross-platform Build Checks
+
+on: [push, pull_request]
+
+jobs:
+  build:
+      strategy:
+        matrix:
+          os: [ubuntu-latest, windows-latest, macos-latest]
+      runs-on: ${{ matrix.os }}
+
+      steps:
+        - name: Checkout sources
+          uses: actions/checkout@v4
+
+        - name: Install dependency on ubuntu
+          if: matrix.os == 'ubuntu-latest'
+          run: |
+            sudo apt update && sudo apt install -y build-essential
+            wget https://cmake.org/files/v4.0/cmake-4.0.0-linux-x86_64.tar.gz
+            tar -xzf cmake-4.0.0-linux-x86_64.tar.gz
+            sudo mv cmake-4.0.0-linux-x86_64 /opt/cmake-4.0
+            echo "/opt/cmake-4.0/bin" >> $GITHUB_PATH
+          
+        - name: Install dependency on ${{ matrix.os }}
+          if: ${{matrix.os == 'windows-latest' || matrix.os == 'macos-latest'}}
+          uses: ssrobins/install-cmake@v1
+          with:
+            version: 4.0.0
+         
+        - name: Run CMake's build system generator on ${{ matrix.os }}
+          run: cmake -S . -B out
+
+        - name: Try compiling on ${{ matrix.os }}
+          run: cmake --build out
+
+  build-freebsd:
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: vmactions/freebsd-vm@v1
+        with:
+          prepare: |
+            pkg update
+            pkg install -y gcc cmake
+        
+      - name: Run CMake's build system generator
+        run: cmake -S . -B out
+
+      - name: Try compiling
+        run: cmake --build out 
