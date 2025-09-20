@@ -81,26 +81,31 @@ jobs:
           usesh: true
           prepare: |
             pkg update
-            pkg install -y gcc gmake cmake git wget   
+            pkg install -y gcc gmake git wget   
        
-      - name: Secret setup # Please don't laugh
+      - name: Setup the repo and CMake ready
+      # The bootstrap script is very long
         run: |
           git clone https://github.com/MayaChen350/NoteViewer.git
-          wget https://cmake.org/files/v4.0/cmake-4.0.0-linux-x86_64.tar.gz
-          tar -xzf cmake-4.0.0-linux-x86_64.tar.gz
-          mv cmake-4.0.0-linux-x86_64 NoteViewer/cmake 
+          wget -P . https://github.com/Kitware/CMake/releases/download/v4.0.4/cmake-4.0.4.tar.gz
+          tar -xzf cmake-4.0.4.tar.gz -C .
+          cd cmake-4.0.4
+          ./bootstrap
+          make
+          make install
+          cd ..
 
       - name: Run CMake's build system generator
         if: matrix.arch == 'x64' 
         run: |
           cd NoteViewer
-          ./cmake -S . -B out 
+          cmake -S . -B out 
       
       - name: Run CMake's build system gen for cross-compilation
         if: matrix.arch == 'aarch64' 
         run: |
           cd NoteViewer
-          ./cmake -S . -B out \
+          cmake -S . -B out \
           -DCMAKE_SYSTEM_NAME=FreeBSD \
           -DCMAKE_SYSTEM=aarch64 \
           -DCMAKE_C_COMPILER=clang \
