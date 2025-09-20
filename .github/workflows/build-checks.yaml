@@ -24,14 +24,14 @@ jobs:
             sudo mv cmake-4.0.0-linux-x86_64 /opt/cmake-4.0
             echo "/opt/cmake-4.0/bin" >> $GITHUB_PATH
           
-        - name: Install dependency on ${{ matrix.os }}
+        - name: Install dependency on windows
           if: matrix.os == 'windows-latest'
           uses: ssrobins/install-cmake@v1
           with:
             version: 4.0.0
          
         - name: Run CMake's build system generator 
-          if: matrix.arch == 'x64'
+          if: ${{ (matrix.arch == 'x64' && matrix.os != 'macos-latest') || (matrix.os == 'macos-latest' && matrix.arch == 'aarch64') }}
           run: cmake -S . -B out
 
         - name: Install cross-compiler
@@ -48,16 +48,16 @@ jobs:
             cmake -S . -B out \
             -DCMAKE_SYSTEM_NAME=Linux \
             -DCMAKE_SYSTEM=aarch64 \
-            -DCMAKE_C_COMPILER=aarch64-linux-gcc \
+            -DCMAKE_C_COMPILER=aarch64-linux-gcc
         
         - name: Run CMake's build system gen for cross-compilation
           if: ${{matrix.arch == 'aarch64' && matrix.os == 'windows-latest'}}
           run: |
             cmake -S . -B out \
-            -CMAKE_SYSTEM_NAME=Windows \
-            -CMAKE_SYSTEM_PROCESSOR=aarch64 \
-            -CMAKE_C_COMPILER=zig cc -target aarch64-windows-gnu \
-            -CMAKE_CXX_COMPILER=zig c++ -target aarch64-windows-gnu \
+            -DCMAKE_SYSTEM_NAME=Windows \
+            -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
+            -DCMAKE_C_COMPILER="zig cc -target aarch64-windows-gnu" \
+            -DCMAKE_CXX_COMPILER="zig c++ -target aarch64-windows-gnu" 
         
         - name: Run CMake's build system gen for cross-compilation
           if: ${{matrix.arch == 'x64' && matrix.os == 'macos-latest'}}
@@ -78,10 +78,11 @@ jobs:
     steps:
       - uses: vmactions/freebsd-vm@v1
         with:
+          usesh: true
           prepare: |
             pkg update
-            pkg install -y gcc cmake
-            cd ..
+            pkg install -y gcc realpath gmake cmake
+            echo $((realpath .))
         
       - name: Run CMake's build system generator
         if: matrix.arch == 'x64' 
