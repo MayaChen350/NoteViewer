@@ -6,4 +6,5 @@ set(CMAKE_C_STANDARD 99)
 add_executable(NoteViewer main.c
         sequence.h
         types.h
-        sequence.c)
+        sequence.c
+        consts.h)
