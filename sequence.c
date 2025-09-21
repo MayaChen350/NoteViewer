@@ -9,6 +9,7 @@
 
 #include "types.h"
 
+// Returns a pointer to the `next` element.
 sequence_t *attach(sequence_t *curr_seq_ptr, const str new_elem) {
     sequence_t *new_seq_ptr = malloc(sizeof(sequence_t));
     new_seq_ptr->elem = new_elem;
@@ -17,9 +18,10 @@ sequence_t *attach(sequence_t *curr_seq_ptr, const str new_elem) {
     return new_seq_ptr;
 }
 
+// The seq should be NULL at the end
 str assemble_str(sequence_t *seq, const wchar_t rest_of_the_chars[CHUNK_SIZE / sizeof(wchar_t)]) {
     void* backup = seq;
-    str s;
+    wchar_t *s;
 
     // I'm sure the compiler will be glad to optimize this "scope" :clueless:
     {

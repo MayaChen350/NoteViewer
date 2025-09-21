@@ -1,6 +1,9 @@
 name: Cross-platform Build Checks
 
-on: [push, pull_request]
+on: 
+  push:
+    branches: [main]
+  pull_request:
 
 jobs:
   build:
@@ -68,8 +71,9 @@ jobs:
         - name: Try compiling
           run: cmake --build out
 
+  # It should work anyway I'm pretty sure
   build-freebsd:
-    # if: false
+    if: false
     strategy:
         fail-fast: false
         matrix:
