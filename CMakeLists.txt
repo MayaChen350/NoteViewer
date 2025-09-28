@@ -7,4 +7,9 @@ add_executable(NoteViewer main.c
         sequence.h
         types.h
         sequence.c
-        consts.h)
+        consts.h
+        utils.h
+        parse.c
+        parse.h
+        utils.c
+)
