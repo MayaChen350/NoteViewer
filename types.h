@@ -5,11 +5,11 @@
 #ifndef NOTEVIEWER_TYPES_H
 #define NOTEVIEWER_TYPES_H
 
-typedef const wchar_t* str;
+typedef const wchar_t *str;
 
 typedef char byte_t;
 
 #define TRUE 1
 #define FALSE 0
 
-#endif //NOTEVIEWER_TYPES_H
+#endif // NOTEVIEWER_TYPES_H

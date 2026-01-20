@@ -21,7 +21,7 @@ sequence_t *attach(sequence_t *curr_seq_ptr, const str new_elem) {
 // The seq should be NULL at the end
 str assemble_str(sequence_t *seq, const wchar_t rest_of_the_chars[CHUNK_SIZE / sizeof(wchar_t)]) {
     void *backup = seq; // Save starting addresses
-    wchar_t *ret_str;
+    wchar_t* ret_str;
 
     // I'm sure the compiler will be glad to optimize this "scope" :clueless:
     {

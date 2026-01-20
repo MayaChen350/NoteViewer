@@ -8,5 +8,6 @@
 
 #include "sequence.h"
 
-void parse_file_content(FILE *file, const wchar_t *word_to_base_output_on, sequence_t **curr_seq_ptr);
-#endif //NOTEVIEWER_PARSE_H
+void parse_file_content(FILE *file, const wchar_t *word_to_base_output_on,
+                        sequence_t **curr_seq_ptr);
+#endif // NOTEVIEWER_PARSE_H

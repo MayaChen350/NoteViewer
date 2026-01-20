@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 3.16)
 project(NoteViewer C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(NoteViewer main.c
+add_executable(noteviewer main.c
         sequence.h
         types.h
         sequence.c

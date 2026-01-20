@@ -10,15 +10,15 @@
 #include "types.h"
 
 struct sequence_strs {
-    str elem;
-    struct sequence_strs *next;
+  str elem;
+  struct sequence_strs *next;
 };
 
 typedef struct sequence_strs sequence_t;
 
 sequence_t *attach(sequence_t *curr_seq_ptr, str new_elem);
 
-str assemble_str(sequence_t *seq, const wchar_t rest_of_the_chars[CHUNK_SIZE / sizeof(wchar_t)]);
+str assemble_str(sequence_t *seq,
+                 const wchar_t rest_of_the_chars[CHUNK_SIZE / sizeof(wchar_t)]);
 
-
-#endif //NOTEVIEWER_SEQUENCE_H
+#endif // NOTEVIEWER_SEQUENCE_H

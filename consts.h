@@ -7,7 +7,8 @@
 #define NOTEVIEWER_CONSTS_H
 #include <stdint.h>
 
-// I'm sure this makes sense trust plus why not a bit of conditional macros magic
+// I'm sure this makes sense trust plus why not a bit of conditional macros
+// magic
 #if INTPTR_MAX == INT32_MAX
 #define CHUNK_SIZE 32
 #elif INTPTR_MAX == INT64_MAX
@@ -21,4 +22,4 @@
 #error "Compilation failure. I don't think this will work on your computer."
 #endif
 
-#endif //NOTEVIEWER_CONSTS_H
+#endif // NOTEVIEWER_CONSTS_H
