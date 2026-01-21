@@ -9,16 +9,23 @@
 #include "consts.h"
 #include "types.h"
 
-struct sequence_strs {
-  str elem;
-  struct sequence_strs *next;
+struct seq_element {
+  void *elem;
+  struct seq_element *next;
 };
 
-typedef struct sequence_strs sequence_t;
+struct sequence {
+  struct seq_element *head;
+  struct seq_element *tail;
+};
 
-sequence_t *attach(sequence_t *curr_seq_ptr, str new_elem);
+typedef struct sequence seq_t;
+typedef struct seq_element seq_elem;
 
-str assemble_str(sequence_t *seq,
-                 const wchar_t rest_of_the_chars[CHUNK_SIZE / sizeof(wchar_t)]);
+seq_t *seq_init(seq_t *self);
+seq_t *seq_create(); 
+void seq_destroy(seq_t *self, void (*elem_destroy)(void *));
+
+void seq_attach(seq_t *self, void *new_elem);
 
 #endif // NOTEVIEWER_SEQUENCE_H

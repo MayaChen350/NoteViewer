@@ -4,8 +4,9 @@
 #include <wchar.h>
 
 #include "consts.h"
-#include "parse.h"
 #include "sequence.h"
+#include "multiParser.h"
+#include "singleParser.h"
 #include "types.h"
 
 int main(int argc, char **argv) {
@@ -13,25 +14,19 @@ int main(int argc, char **argv) {
 
   FILE *file = fopen("test.txt", "r");
 
-  const char *arg2 = argv[1];
-  wchar_t *word_to_base_output_on = malloc(sizeof(wchar_t) * strlen(arg2));
-  mbstowcs(word_to_base_output_on, arg2, strlen(arg2));
-
-  sequence_t main_sequence_of_chars; // Also the start of sequence
-  sequence_t *seq_ptr =
-      &main_sequence_of_chars; // movable pointer, start at the thing above
-
-  parse_file_content(file, word_to_base_output_on, &seq_ptr);
-  fclose(file);
-
-  // TODO: Formatting
-  while (main_sequence_of_chars.next != NULL) {
-    seq_ptr = &main_sequence_of_chars;
-    wprintf(L"%ls", seq_ptr->elem);
-
-    // no time to free anything
-
-    seq_ptr = seq_ptr->next;
+  if (strcmp(argv[1], "--single"))
+    if (argv[2] == NULL) {
+      printf("Missing arguments.");
+      return 1;
+    }
+    else {
+      size_t arg2_len = strlen(argv[2]);
+      wchar_t *word_to_base_output_on = malloc(sizeof(wchar_t) * arg2_len);
+      mbstowcs(word_to_base_output_on, argv[2], arg2_len);
+      printf("%s", singleParse(file, word_to_base_output_on));
+    }
+  else {
+      printf("%s", multiParse(file));
   }
 
   return 0;

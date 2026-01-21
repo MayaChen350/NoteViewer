@@ -2,55 +2,51 @@
 // Created by mayachen on 2025-09-19.
 //
 
-#include "sequence.h"
 #include <stdlib.h>
-#include <string.h>
-#include <wchar.h>
 
-#include "types.h"
+#include "sequence.h"
 
-// Returns a pointer to the `next` element.
-sequence_t *attach(sequence_t *curr_seq_ptr, const str new_elem) {
-    sequence_t *new_seq_ptr = malloc(sizeof(sequence_t));
-    new_seq_ptr->elem = new_elem;
+seq_elem *seq_elem_create(void *elem) {
+  seq_elem *it = malloc(sizeof(seq_elem));
+  it->elem = elem;
+  it->next = NULL;
 
-    curr_seq_ptr->next = new_seq_ptr;
-    return new_seq_ptr;
+  return it;
 }
 
-// The seq should be NULL at the end
-str assemble_str(sequence_t *seq, const wchar_t rest_of_the_chars[CHUNK_SIZE / sizeof(wchar_t)]) {
-    void *backup = seq; // Save starting addresses
-    wchar_t* ret_str;
+seq_t *seq_init(seq_t *self) {
+  self->head = self->tail = NULL;
+  return self;
+}
 
-    // I'm sure the compiler will be glad to optimize this "scope" :clueless:
-    {
-        size_t len = wcslen(rest_of_the_chars);
-        // Reused pointer backup variable
-        while (seq->elem != NULL) {
-            len += wcslen(seq->elem);
-            seq = seq->next; // truly the peakest type of loops
-        }
+seq_t *seq_create(void) {
+  seq_t *seq = malloc(sizeof(seq_t));
 
-        ret_str = malloc((len + 1) * sizeof(wchar_t));
-    }
+  return seq_init(seq);
+}
 
-    seq = (sequence_t *) backup;
-    backup = ret_str;
+// DESTROY EACH ELEMENT WITH seq_destroy //
 
-    while (seq->elem != NULL) {
-        wcscpy(ret_str, seq->elem);
-        ret_str += wcslen(seq->elem);
-        sequence_t *old_seq = seq;
-        seq = seq->next;
-        free(old_seq); // it has served its purpose
-        // it can now enjoy crystal stasis
-    }
+void seq_attach_first(seq_t *self, void *new_elem) {
+  self->head = self->tail = seq_elem_create(new_elem);
+}
 
-    free(seq);
-    wcscpy(ret_str, rest_of_the_chars); // it fits well its name
+// Attach a new element to the chain.
+void seq_attach(seq_t *self, void *new_elem) {
+  if (self->head == NULL)
+    return seq_attach_first(self, new_elem);
 
-    ret_str = backup;
+  self->tail = self->tail->next = seq_elem_create(new_elem);
+}
 
-    return ret_str;
+void seq_destroy(seq_t *self, void (*elem_destroy)(void *)) {
+  seq_elem *el = self->head;
+  while (el != NULL) {
+    elem_destroy(el->elem);
+    seq_elem *next = el->next;
+
+    free(el);
+
+    el = next;
+  };
 }
